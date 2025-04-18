@@ -1,0 +1,14 @@
+[project]
+name = "notesplus"
+version = "0.1.0"
+description = "Notes application"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.15.2",
+    "apscheduler>=3.11.0",
+    "bcrypt>=4.3.0",
+    "fastapi[standard]>=0.115.12",
+    "passlib>=1.7.4",
+    "sqlalchemy>=2.0.40",
+]

@@ -1,12 +1,12 @@
 from typing import Annotated
 
-from notes_app.database.models import engine, Note
+from database.models import engine, Note
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from notes_app.scheduler import scheduler_task
+from scheduler import scheduler_task
 
-from notes_app.authorization import Authorization
+from authorization import Authorization
 
 from fastapi import FastAPI, Depends, HTTPException, status
 import uvicorn

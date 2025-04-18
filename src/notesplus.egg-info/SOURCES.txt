@@ -2,6 +2,8 @@ README.md
 pyproject.toml
 src/notes_app/__init__.py
 src/notes_app/__main__.py
+src/notes_app/authorization.py
+src/notes_app/scheduler.py
 src/notes_app/database/models.py
 src/notesplus.egg-info/PKG-INFO
 src/notesplus.egg-info/SOURCES.txt

@@ -1,4 +1,4 @@
-from src.notes_app.database.models import engine, Note
+from notes_app.database.models import engine, Note
 from sqlalchemy.orm import Session
 from sqlalchemy import delete
 

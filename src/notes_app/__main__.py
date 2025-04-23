@@ -11,8 +11,8 @@ from notes_app.authorization import Authorization
 from fastapi import FastAPI, Depends, HTTPException, status
 import uvicorn
 
-from kafka import KafkaProducer
-import json
+from notes_app.kafka_services.producer import producer
+from notes_app.kafka_services.config import TOPIC_NAMES
 
 
 app = FastAPI()
@@ -20,11 +20,6 @@ app = FastAPI()
 scheduler_task.start()
 
 app.state.authorization = False
-
-producer = KafkaProducer(
-    bootstrap_servers=["localhost:9092"],
-    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-)
 
 
 class NoteRepo:
@@ -69,8 +64,15 @@ def add_note(content: str):
         new_note = Note(content=content)
         session.add(new_note)
         session.commit()
-    producer.send("notes_topic", {"note": content})
+
+    user = "johndoe"
+    message = f"{user} add note: {content}"
+    producer.send(
+        topic=TOPIC_NAMES["notes_events"],
+        value=bytes(message, encoding="utf-8"),
+    )
     producer.flush()
+
     return {"success": True, "msg": "Заметка добавлена"}
 
 

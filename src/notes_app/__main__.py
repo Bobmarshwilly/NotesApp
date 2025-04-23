@@ -1,15 +1,18 @@
 from typing import Annotated
 
-from database.models import engine, Note
+from notes_app.database.models import engine, Note
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from scheduler import scheduler_task
+from notes_app.scheduler import scheduler_task
 
-from authorization import Authorization
+from notes_app.authorization import Authorization
 
 from fastapi import FastAPI, Depends, HTTPException, status
 import uvicorn
+
+from kafka import KafkaProducer
+import json
 
 
 app = FastAPI()
@@ -17,6 +20,11 @@ app = FastAPI()
 scheduler_task.start()
 
 app.state.authorization = False
+
+producer = KafkaProducer(
+    bootstrap_servers=["localhost:9092"],
+    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+)
 
 
 class NoteRepo:
@@ -54,7 +62,6 @@ def login_in(username: str, password: str):
     return {"authorization": "success"}
 
 
-
 @app.post("/notes", summary="Добавление заметки в БД", tags=["Заметки"])
 def add_note(content: str):
     check_authorization_status()
@@ -62,6 +69,8 @@ def add_note(content: str):
         new_note = Note(content=content)
         session.add(new_note)
         session.commit()
+    producer.send("notes_topic", {"note": content})
+    producer.flush()
     return {"success": True, "msg": "Заметка добавлена"}
 
 

@@ -9,6 +9,11 @@ dependencies = [
     "apscheduler>=3.11.0",
     "bcrypt>=4.3.0",
     "fastapi[standard]>=0.115.12",
+    "kafka-python>=2.1.5",
     "passlib>=1.7.4",
     "sqlalchemy>=2.0.40",
 ]
+
+[build-system]
+requires = ["setuptools==75.8.0"]
+build-backend = "setuptools.build_meta"

@@ -3,4 +3,4 @@ from notes_app.kafka_services.config import PRODUCER_CONFIG
 import json
 
 
-producer = KafkaProducer(**PRODUCER_CONFIG)
+kafka_producer = KafkaProducer(**PRODUCER_CONFIG)

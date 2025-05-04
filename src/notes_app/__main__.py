@@ -32,7 +32,7 @@ def get_note_repo(session: Annotated[Session, Depends(get_session)]):
 
 
 def get_authorization():
-    return Authorization
+    return Authorization()
 
 
 def check_authorization_status():
@@ -52,7 +52,6 @@ def login_in(
     authorization_status = authorization.authenticate_user(
         username=username, password=password
     )
-    print(authorization_status)
     if not authorization_status:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

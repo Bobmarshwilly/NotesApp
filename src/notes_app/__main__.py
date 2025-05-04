@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from notes_app.database.models import engine, session_factory, Note, NoteAdded
+from notes_app.database.models import session_factory, Note, NoteAdded
 from sqlalchemy.orm import Session
 from notes_app.database.repositories.note_repo import NoteRepo
 
@@ -12,7 +12,6 @@ from fastapi import FastAPI, Depends, HTTPException, status
 import uvicorn
 
 from notes_app.kafka_services.producer import kafka_producer
-from notes_app.kafka_services.config import TOPIC_NAMES
 from notes_app.kafka_services.notifier import Notifier
 
 
@@ -50,7 +49,9 @@ def login_in(
     password: str,
     authorization: Annotated[Authorization, Depends(get_authorization)],
 ):
-    authorization_status = authorization.authenticate_user(username=username, password=password)
+    authorization_status = authorization.authenticate_user(
+        username=username, password=password
+    )
     print(authorization_status)
     if not authorization_status:
         raise HTTPException(

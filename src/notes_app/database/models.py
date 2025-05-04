@@ -23,7 +23,7 @@ class Note(Base):
 
     def __repr__(self):
         return f'Note(id={self.id}, content="{self.content}")'
-    
+
 
 @dataclass(frozen=True)
 class NoteAdded:

@@ -42,3 +42,17 @@ jobs:
         run: ./.venv/bin/ruff check
       - name: Lint with ruff format
         run: ./.venv/bin/ruff format --check
+  mypy:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore cached venv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./.venv
+            ~/.local/share/uv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
+      - name: Lint with mypy check
+        run: ./.venv/bin/mypy src

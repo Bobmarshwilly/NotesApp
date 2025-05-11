@@ -11,7 +11,9 @@ dependencies = [
     "fastapi[standard]>=0.115.12",
     "kafka-python>=2.1.5",
     "passlib>=1.7.4",
+    "python-jose>=3.4.0",
     "sqlalchemy>=2.0.40",
+    "types-python-jose>=3.4.0.20250224",
 ]
 
 [build-system]

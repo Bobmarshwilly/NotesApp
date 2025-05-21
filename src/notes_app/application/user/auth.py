@@ -4,24 +4,19 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
-from notes_app.database.models import User
-from notes_app.database.models import get_session
-from notes_app.database.repositories.user_repo import UserRepo
+from notes_app.infrastructure.database.models.user_table import User
+from notes_app.api.providers import get_user_repo
+from notes_app.infrastructure.database.repositories.user_repo import UserRepo
 
-SECRET_KEY = "5a753cd077c5a424cff7bab5d8d5fdd8ed46f41ade877465ffa56ae447682f4d"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+AUTH_JWT_SECRET_KEY = "5a753cd077c5a424cff7bab5d8d5fdd8ed46f41ade877465ffa56ae447682f4d"
+AUTH_JWT_ALGORITHM = "HS256"
+AUTH_JWT_ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
-def get_user_repo(session: Annotated[Session, Depends(get_session)]):
-    return UserRepo(session=session)
-
-
-def get_current_user(
+async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     user_repo: Annotated[UserRepo, Depends(get_user_repo)],
 ) -> User:
@@ -31,14 +26,16 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token, AUTH_JWT_SECRET_KEY, algorithms=[AUTH_JWT_ALGORITHM]
+        )
         username: Optional[str] = payload.get("sub")
         if username is None:
             raise credentials_exeption
     except JWTError:
         raise credentials_exeption
 
-    user = user_repo.get_user(username=username)
+    user = await user_repo.get_user(username=username)
     if user is None:
         raise credentials_exeption
     return user
@@ -59,5 +56,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     else:
         expire = datetime.now() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, AUTH_JWT_SECRET_KEY, algorithm=AUTH_JWT_ALGORITHM
+    )
     return encoded_jwt

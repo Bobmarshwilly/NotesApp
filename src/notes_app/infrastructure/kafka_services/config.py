@@ -6,6 +6,9 @@ TOPIC_NAMES = {
 
 PRODUCER_CONFIG = {
     "bootstrap_servers": BOOTSTRAP_SERVERS,
+    "client_id": "notes-app-producer",
+    "acks": "all",
+    "request_timeout_ms": 5000,
 }
 
 CONSUMER_CONFIG = {

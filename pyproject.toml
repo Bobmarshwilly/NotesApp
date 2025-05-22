@@ -17,13 +17,13 @@ dependencies = [
     "types-python-jose>=3.4.0.20250224",
 ]
 
-[build-system]
-requires = ["setuptools==75.8.0"]
-build-backend = "setuptools.build_meta"
-
-[dependency-groups]
+[project.optional-dependencies]
 lint = [
     "mypy>=1.15.0",
     "ruff>=0.11.8",
     "types-passlib>=1.7.7.20250408",
 ]
+
+[build-system]
+requires = ["setuptools==75.8.0"]
+build-backend = "setuptools.build_meta"

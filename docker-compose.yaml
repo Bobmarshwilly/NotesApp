@@ -17,6 +17,7 @@ services:
 
   kafka:
     image: apache/kafka:4.0.0
+    user: root
     hostname: kafka
     environment:
       KAFKA_CLUSTER_ID: "5Yr1SI2bTJK3P-V7DFzvuQ"

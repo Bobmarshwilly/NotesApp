@@ -13,7 +13,7 @@ COPY pyproject.toml uv.lock ./
 
 RUN python -m venv /app/.venv && \
     . /app/.venv/bin/activate && \
-    uv pip install --no-cache -r uv.lock && \
+    uv sync && \
     pip install --no-cache-dir -e . && \
     alembic --version
 

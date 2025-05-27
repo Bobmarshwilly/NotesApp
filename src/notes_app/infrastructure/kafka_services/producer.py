@@ -6,10 +6,9 @@ class KafkaProducer:
     _instance = None
 
     def __init__(self):
-        self.producer = None
+        self.producer = AIOKafkaProducer(**PRODUCER_CONFIG)
 
     async def start(self):
-        self.producer = AIOKafkaProducer(**PRODUCER_CONFIG)
         await self.producer.start()
 
     async def stop(self):

@@ -1,4 +1,4 @@
-BOOTSTRAP_SERVERS = ["localhost:9092"]
+BOOTSTRAP_SERVERS = ["kafka:9092"]
 
 TOPIC_NAMES = {
     "notes_events": "notes_events_topic",

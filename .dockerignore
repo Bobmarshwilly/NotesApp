@@ -11,6 +11,7 @@ __pycache__/
 *.pyo
 *.pyd
 .python-version
+*.egg-info
 
 mypy.ini
 tests/

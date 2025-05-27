@@ -7,6 +7,7 @@ from passlib.context import CryptContext
 from notes_app.infrastructure.database.models.user_table import User
 from notes_app.api.providers import get_user_repo
 from notes_app.infrastructure.database.repositories.user_repo import UserRepo
+from notes_app.application.user.user_exceptions import InvalidCredentialsError
 
 AUTH_JWT_SECRET_KEY = "5a753cd077c5a424cff7bab5d8d5fdd8ed46f41ade877465ffa56ae447682f4d"
 AUTH_JWT_ALGORITHM = "HS256"
@@ -60,3 +61,14 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
         to_encode, AUTH_JWT_SECRET_KEY, algorithm=AUTH_JWT_ALGORITHM
     )
     return encoded_jwt
+
+
+async def authenticate_user(username: str, password: str, user_repo: UserRepo):
+    user = await user_repo.get_user(username)
+    if not user or not verify_password(password, user.hashed_password):
+        raise InvalidCredentialsError("Incorrect username or password")
+    access_token_expire = timedelta(minutes=AUTH_JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expire
+    )
+    return access_token

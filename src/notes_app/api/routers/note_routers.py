@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from notes_app.api.providers import get_note_repo, get_notifier, get_tx_manager
 from notes_app.api.models.note_schema import NoteCreate, NoteResponse
 from notes_app.infrastructure.database.repositories.note_repo import NoteRepo
@@ -21,14 +21,20 @@ async def add_note(
     notifier: Annotated[Notifier, Depends(get_notifier)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    await create_note(
-        note=note,
-        note_repo=note_repo,
-        tx_manager=tx_manager,
-        notifier=notifier,
-        current_user=current_user,
-    )
-    return {"status": "success", "message": "Заметка успешно добавлена!"}
+    try:
+        await create_note(
+            note=note,
+            note_repo=note_repo,
+            tx_manager=tx_manager,
+            notifier=notifier,
+            current_user=current_user,
+        )
+        return {"status": "success", "message": "Заметка успешно добавлена!"}
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create note",
+        )
 
 
 @router.get(
@@ -38,5 +44,11 @@ async def list_notes(
     note_repo: Annotated[NoteRepo, Depends(get_note_repo)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    notes = await note_repo.get_notes(current_user=current_user)
-    return notes
+    try:
+        notes = await note_repo.get_notes(current_user=current_user)
+        return notes
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to list notes",
+        )

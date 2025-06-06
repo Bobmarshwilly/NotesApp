@@ -11,6 +11,10 @@ class NoteResponse(BaseModel):
     content: str
 
 
+class NoteID(BaseModel):
+    id: int
+
+
 # Класс для отправки сообщения в Kafka
 @dataclass(frozen=True)
 class NoteAdded:

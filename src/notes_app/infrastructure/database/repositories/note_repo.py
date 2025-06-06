@@ -11,10 +11,19 @@ class NoteRepo:
     async def add_note(self, note: Note) -> None:
         self._session.add(note)
 
+    async def get_note_by_id(self, note_id) -> Note | None:
+        stmt = select(Note).where(Note.id == note_id)
+        note = await self._session.execute(stmt)
+        return note.scalar()
+
     async def get_notes(self, current_user: User) -> list[Note]:
         stmt = select(Note).where(Note.owner_id == current_user.id)
         notes = await self._session.execute(stmt)
         return list(notes.scalars().all())
+
+    async def delete_note(self, id) -> None:
+        stmt = delete(Note).where(Note.id == id)
+        await self._session.execute(stmt)
 
     async def delete_all_notes(self) -> None:
         stmt = delete(Note)

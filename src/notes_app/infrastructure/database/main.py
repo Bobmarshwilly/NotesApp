@@ -1,11 +1,18 @@
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
+import os
+from dotenv import load_dotenv
 
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL is None:
+    raise RuntimeError("DATABASE_URL environment variable is not set")
 
 engine = create_async_engine(
-    "sqlite+aiosqlite:///src/notes_app/infrastructure/database/notes_app_database.db",
+    DATABASE_URL,
     echo=True,
     future=True,
-    connect_args={"check_same_thread": False},
 )
 async_session = async_sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)

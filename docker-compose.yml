@@ -4,14 +4,28 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=sqlite+aiosqlite:////app/src/notes_app/infrastructure/database/notes_app_database.db
+      - DATABASE_URL=postgresql+asyncpg://bobmarshwilly:06062025@postgres:5432/notes_app_db
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     volumes:
-      - ./src/notes_app/infrastructure/database:/app/src/notes_app/infrastructure/database
       - ./alembic:/app/alembic
     depends_on:
-      kafka:
-        condition: service_healthy
+      - postgres
+      - kafka
+  
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=bobmarshwilly
+      - POSTGRES_PASSWORD=06062025
+      - POSTGRES_DB=notes_app_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   kafka:
     image: bitnami/kafka:3.7
@@ -37,3 +51,4 @@ services:
 
 volumes:
   kafka-data:
+  postgres-data:

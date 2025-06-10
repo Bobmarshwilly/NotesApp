@@ -1,12 +1,18 @@
 from aiokafka import AIOKafkaProducer
-from notes_app.infrastructure.kafka_services.config import PRODUCER_CONFIG
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
+from notes_app.infrastructure.config import config  # noqa: E402
 
 
 class KafkaProducer:
     _instance = None
 
     def __init__(self):
-        self.producer = AIOKafkaProducer(**PRODUCER_CONFIG)
+        self.producer = AIOKafkaProducer(**config.KAFKA_PRODUCER_CONFIG)
 
     async def start(self):
         await self.producer.start()

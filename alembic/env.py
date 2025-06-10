@@ -5,9 +5,17 @@ from sqlalchemy import pool
 
 from alembic import context
 
+from dotenv import load_dotenv
+
 from notes_app.infrastructure.database.models.base import Base
 from notes_app.infrastructure.database.models.note_table import Note  # noqa: F401
 from notes_app.infrastructure.database.models.user_table import User  # noqa: F401
+
+load_dotenv()
+
+from notes_app.infrastructure.config import config as app_config  # noqa: E402
+
+context.config.set_main_option("sqlalchemy.url", app_config.ALEMBIC_DB_URL)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

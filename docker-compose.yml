@@ -3,8 +3,10 @@ services:
     build: .
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgresql+asyncpg://bobmarshwilly:06062025@postgres:5432/notes_app_db
+      - DATABASE_URL=postgresql+asyncpg://${DATABASE_USER}:${DATABASE_PASS}@postgres:5432/${DATABASE_NAME}
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     volumes:
       - ./alembic:/app/alembic
@@ -15,9 +17,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_USER=bobmarshwilly
-      - POSTGRES_PASSWORD=06062025
-      - POSTGRES_DB=notes_app_db
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASS}
+      - POSTGRES_DB=${DATABASE_NAME}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s

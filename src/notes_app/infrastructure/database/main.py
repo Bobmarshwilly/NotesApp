@@ -1,14 +1,15 @@
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
-import os
 from dotenv import load_dotenv
 
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-if DATABASE_URL is None:
-    raise RuntimeError("DATABASE_URL environment variable is not set")
+
+from notes_app.infrastructure.config import config  # noqa: E402
+
+
+DATABASE_URL = config.DB_URL
 
 engine = create_async_engine(
     DATABASE_URL,

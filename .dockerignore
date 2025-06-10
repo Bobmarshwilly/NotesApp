@@ -20,8 +20,6 @@ coverage.xml
 .pytest_cache/
 *.log
 
-src/notes_app/infrastructure/database/notes_app_database.db
-
 !alembic.ini
 !pyproject.toml
 !uv.lock

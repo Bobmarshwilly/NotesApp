@@ -1,10 +1,18 @@
 import asyncio
 from aiokafka import AIOKafkaConsumer
-from notes_app.infrastructure.kafka_services.config import CONSUMER_CONFIG, TOPIC_NAMES
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
+from notes_app.infrastructure.config import config  # noqa: E402
 
 
 async def consume():
-    consumer = AIOKafkaConsumer(TOPIC_NAMES["notes_events"], **CONSUMER_CONFIG)
+    consumer = AIOKafkaConsumer(
+        config.KAFKA_TOPIC_NAMES["notes_events"], **config.KAFKA_CONSUMER_CONFIG
+    )
     await consumer.start()
     try:
         async for message in consumer:

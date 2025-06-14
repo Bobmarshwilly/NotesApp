@@ -16,10 +16,21 @@ class NoteRepo:
         note = await self._session.execute(stmt)
         return note.scalar()
 
-    async def get_notes(self, current_user: User) -> list[Note]:
-        stmt = select(Note).where(Note.owner_id == current_user.id)
+    async def get_notes(self, current_user: User, skip: int, limit: int) -> list[Note]:
+        stmt = (
+            select(Note)
+            .where(Note.owner_id == current_user.id)
+            .offset(skip)
+            .limit(limit)
+        )
         notes = await self._session.execute(stmt)
         return list(notes.scalars().all())
+
+    async def update_note(self, note: Note, update_data: dict) -> Note:
+        for key, value in update_data.items():
+            if hasattr(note, key):
+                setattr(note, key, value)
+        return note
 
     async def delete_note(self, id) -> None:
         stmt = delete(Note).where(Note.id == id)

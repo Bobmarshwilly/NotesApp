@@ -1,81 +1,117 @@
-from typing import List
-
-import os
-from dotenv import load_dotenv
+from typing import List, Dict
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-load_dotenv()
+class EnvConfig(BaseSettings):
+    """Класс с определением режима запуска приложения"""
+
+    ENV_MODE: str
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
 
-class BaseConfig:
+class BaseConfig(BaseSettings):
     """Базовый класс конфигурации с общими настройками"""
 
-    DB_DRIVER = "postgresql+asyncpg"
-    SYNC_DB_DRIVER = "postgresql"
-    DB_PORT = "5432"
+    """Конфигурация базы данных"""
+    ASYNC_DB_DRIVER: str = "postgresql+asyncpg"
+    SYNC_DB_DRIVER: str = "postgresql"
+    DB_PORT: str = "5432"
     DB_HOST: str
 
-    KAFKA_BOOTSTRAP_SERVERS: List[str]
+    DB_USER: str
+    DB_PASS: str
+    DB_NAME: str
 
-    KAFKA_TOPIC_NAMES = {
-        "notes_events": "notes_events_topic",
-    }
-    KAFKA_PRODUCER_BASE = {
+    """Конфигурация сервиса Kafka"""
+    KAFKA_BOOTSTRAP_SERVERS: List[str]
+    KAFKA_TOPIC_NAMES: Dict[str, str] = {"notes_events": "notes_events_topic"}
+    KAFKA_PRODUCER_BASE: Dict[str, int | str] = {
         "client_id": "notes-app-producer",
         "acks": "all",
         "request_timeout_ms": 5000,
     }
-    KAFKA_CONSUMER_BASE = {
+    KAFKA_CONSUMER_BASE: Dict[str, str] = {
         "group_id": "my_consumer_group",
         "auto_offset_reset": "earliest",
     }
 
-    def __init__(self):
-        self.DB_USER = os.getenv("DATABASE_USER")
-        self.DB_PASS = os.getenv("DATABASE_PASS")
-        self.DB_NAME = os.getenv("DATABASE_NAME")
+    """Конфигурация сервиса Redis"""
+    REDIS_DRIVER: str = "redis"
+    REDIS_PORT: str = "6379"
+    REDIS_DB: int = 0
+    REDIS_CACHE_EXPIRE_SECONDS: int = 3600
+    REDIS_HOST: str
 
     @property
-    def DB_URL(self):
-        return f"{self.DB_DRIVER}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    def ASYNC_DB_URL(self) -> str:
+        return f"{self.ASYNC_DB_DRIVER}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     @property
-    def ALEMBIC_DB_URL(self):
+    def SYNC_DB_URL(self) -> str:
         return f"{self.SYNC_DB_DRIVER}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     @property
-    def KAFKA_PRODUCER_CONFIG(self):
+    def ALEMBIC_DB_URL(self) -> str:
+        return f"{self.SYNC_DB_DRIVER}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+    @property
+    def KAFKA_PRODUCER_CONFIG(self) -> dict:
         return {
             "bootstrap_servers": self.KAFKA_BOOTSTRAP_SERVERS,
             **self.KAFKA_PRODUCER_BASE,
         }
 
     @property
-    def KAFKA_CONSUMER_CONFIG(self):
+    def KAFKA_CONSUMER_CONFIG(self) -> dict:
         return {
             "bootstrap_servers": self.KAFKA_BOOTSTRAP_SERVERS,
             **self.KAFKA_CONSUMER_BASE,
         }
 
+    @property
+    def REDIS_URL(self) -> str:
+        return f"{self.REDIS_DRIVER}://{self.REDIS_HOST}:{self.REDIS_PORT}"
+
+    @property
+    def CELERY_BROKER_URL(self) -> str:
+        return f"{self.REDIS_DRIVER}://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+
+    @property
+    def CELERY_RESULT_BACKEND(self) -> str:
+        return f"{self.REDIS_DRIVER}://{self.REDIS_HOST}:{self.REDIS_PORT}/1"
+
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
+
 
 class DevelopmentConfig(BaseConfig):
-    """Конфигурация для разработки на локальном копмпьютере"""
-
-    DB_HOST = "localhost"
-    KAFKA_BOOTSTRAP_SERVERS = ["localhost:9092"]
+    DB_HOST: str = "localhost"
+    KAFKA_BOOTSTRAP_SERVERS: List[str] = ["localhost:9092"]
+    REDIS_HOST: str = "localhost"
 
 
 class DockerConfig(BaseConfig):
-    """Конфигурация для сборки и запуска приложения в docker"""
+    DB_HOST: str = "postgres"
+    KAFKA_BOOTSTRAP_SERVERS: List[str] = ["kafka:9092"]
+    REDIS_HOST: str = "redis"
 
-    DB_HOST = "postgres"
-    KAFKA_BOOTSTRAP_SERVERS = ["kafka:9092"]
+
+def get_config() -> BaseConfig:
+    env_config = EnvConfig()
+    env_mode = env_config.ENV_MODE
+
+    if env_mode == "development":
+        return DevelopmentConfig()
+    elif env_mode == "docker":
+        return DockerConfig()
+    else:
+        raise ValueError(f"Unknown ENV_MODE: {env_mode}")
 
 
-status = os.getenv("ENVIRONMENT")
-config: BaseConfig
-
-if status == "development":
-    config = DevelopmentConfig()
-elif status == "docker":
-    config = DockerConfig()
+config = get_config()

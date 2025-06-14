@@ -1,7 +1,19 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import uvicorn
-from notes_app.infrastructure.scheduler.setup import lifespan
 from notes_app.api.routers import auth_routers, note_routers
+from notes_app.infrastructure.kafka_services.producer import KafkaProducer
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    producer = KafkaProducer()
+    await producer.start()
+
+    try:
+        yield
+    finally:
+        await producer.stop()
 
 
 app = FastAPI(lifespan=lifespan)

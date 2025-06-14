@@ -1,12 +1,6 @@
 import asyncio
 from aiokafka import AIOKafkaConsumer
-from dotenv import load_dotenv
-
-
-load_dotenv()
-
-
-from notes_app.infrastructure.config import config  # noqa: E402
+from notes_app.infrastructure.config import config
 
 
 async def consume():

@@ -1,11 +1,5 @@
 from aiokafka import AIOKafkaProducer
-from dotenv import load_dotenv
-
-
-load_dotenv()
-
-
-from notes_app.infrastructure.config import config  # noqa: E402
+from notes_app.infrastructure.config import config
 
 
 class KafkaProducer:

@@ -1,5 +1,6 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
+from dataclasses import dataclass
 
 
 class UserCreate(BaseModel):
@@ -10,3 +11,12 @@ class UserCreate(BaseModel):
 class UserResponse(BaseModel):
     id: int
     username: str
+
+
+@dataclass
+class UserCreatedEvent:
+    username: str
+
+    @property
+    def message(self) -> str:
+        return f"New user was created. Username: {self.username}"

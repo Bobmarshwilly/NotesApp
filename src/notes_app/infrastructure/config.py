@@ -29,7 +29,10 @@ class BaseConfig(BaseSettings):
 
     """Конфигурация сервиса Kafka"""
     KAFKA_BOOTSTRAP_SERVERS: List[str]
-    KAFKA_TOPIC_NAMES: Dict[str, str] = {"notes_events": "notes_events_topic"}
+    KAFKA_TOPIC_NAMES: Dict[str, str] = {
+        "notes_events": "notes_events_topic",
+        "users_events": "users_events_topic",
+    }
     KAFKA_PRODUCER_BASE: Dict[str, int | str] = {
         "client_id": "notes-app-producer",
         "acks": "all",

@@ -1,13 +1,21 @@
+import logging
 from notes_app.infrastructure.database.models.user_table import User
 from notes_app.application.user.auth import get_password_hash
-from notes_app.api.models.user_schema import UserCreate, UserResponse
+from notes_app.api.models.user_schema import UserCreate, UserResponse, UserCreatedEvent
 from notes_app.infrastructure.database.repositories.user_repo import UserRepo
 from notes_app.infrastructure.database.tx_manager import TxManager
 from notes_app.application.user.user_exceptions import UsernameAlreadyExists
+from notes_app.infrastructure.kafka_services.notifier import Notifier
+
+
+logger = logging.getLogger(__name__)
 
 
 async def create_user(
-    user_data: UserCreate, user_repo: UserRepo, tx_manager: TxManager
+    user_data: UserCreate,
+    user_repo: UserRepo,
+    tx_manager: TxManager,
+    notifier: Notifier,
 ) -> UserResponse:
     is_username_exist = await user_repo.get_user(user_data.username)
     if is_username_exist:
@@ -17,7 +25,10 @@ async def create_user(
     try:
         await user_repo.add_user(user=user)
         await tx_manager.commit()
+        event = UserCreatedEvent(username=user.username)
+        await notifier.publish(event=event)
         return UserResponse(id=user.id, username=user.username)
-    except Exception:
+    except Exception as e:
+        logger.error(f"User creating error: {e}")
         await tx_manager.rollback()
-        raise Exception
+        raise

@@ -9,7 +9,7 @@ from notes_app.application.note.note_exceptions import NoAccessToNote, NoteNotFo
 from notes_app.infrastructure.database.models.user_table import User
 from notes_app.infrastructure.database.repositories.note_repo import NoteRepo
 from notes_app.infrastructure.database.tx_manager import TxManager
-from notes_app.infrastructure.kafka_services.notifier import Notifier, NoteAdded
+from notes_app.infrastructure.kafka_services.notifier import Notifier, NoteAddedEvent
 
 
 async def create_note(
@@ -23,7 +23,7 @@ async def create_note(
         new_note: Note = Note(owner_id=current_user.id, content=note.content)
         await note_repo.add_note(new_note)
         await tx_manager.commit()
-        event = NoteAdded(username=current_user.username, content=new_note.content)
+        event = NoteAddedEvent(username=current_user.username, content=new_note.content)
         await notifier.publish(event)
         return NoteResponse(id=new_note.id, content=new_note.content)
     except Exception:

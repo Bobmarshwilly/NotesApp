@@ -24,7 +24,7 @@ class NoteID(BaseModel):
 
 # Класс для отправки сообщения в Kafka
 @dataclass(frozen=True)
-class NoteAdded:
+class NoteAddedEvent:
     username: str
     content: str
 

@@ -1,10 +1,11 @@
 from typing import Annotated
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from dataclasses import dataclass
 
 
 class UserCreate(BaseModel):
     username: Annotated[str, Field(min_length=4, max_length=32)]
+    email: EmailStr
     password: Annotated[str, Field(min_length=8)]
 
 

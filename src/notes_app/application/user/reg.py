@@ -21,7 +21,7 @@ async def create_user(
     if is_username_exist:
         raise UsernameAlreadyExists("Username already registered")
     hashed_password = get_password_hash(user_data.password)
-    user = User(username=user_data.username, hashed_password=hashed_password)
+    user = User(username=user_data.username, email=user_data.email, hashed_password=hashed_password)
     try:
         await user_repo.add_user(user=user)
         await tx_manager.commit()

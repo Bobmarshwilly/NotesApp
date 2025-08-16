@@ -17,9 +17,10 @@ async def create_user(
     tx_manager: TxManager,
     notifier: Notifier,
 ) -> UserResponse:
-    is_username_exist = await user_repo.get_user(user_data.username)
-    if is_username_exist:
-        raise UsernameAlreadyExists("Username already registered")
+    is_username_exist = await user_repo.get_user_by_username(user_data.username)
+    is_email_exist = await user_repo.get_user_by_email(user_data.email)
+    if is_username_exist or is_email_exist:
+        raise UsernameAlreadyExists("Username or email already exists")
     hashed_password = get_password_hash(user_data.password)
     user = User(
         username=user_data.username,

@@ -3,12 +3,14 @@ from fastapi import FastAPI
 import uvicorn
 from notes_app.api.routers import auth_routers, note_routers
 from notes_app.infrastructure.kafka_services.producer import KafkaProducer
+from notes_app.infrastructure.mongo_services.mongo_client import get_mongo_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     producer = KafkaProducer()
     await producer.start()
+    await get_mongo_db()
 
     try:
         yield

@@ -12,6 +12,8 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      mongodb:
+        condition: service_healthy
       redis:
         condition: service_healthy
       celery_worker:
@@ -33,6 +35,22 @@ services:
       timeout: 10s
     volumes:
       - postgres-data:/var/lib/postgresql/data
+
+  mongodb:
+    image: mongo:8
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
 
   kafka:
     image: bitnami/kafka:3.7
@@ -114,3 +132,4 @@ volumes:
   kafka-data:
   postgres-data:
   redis_data:
+  mongodb-data:

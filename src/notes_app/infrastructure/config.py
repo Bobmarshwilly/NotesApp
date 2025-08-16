@@ -1,5 +1,6 @@
 from typing import List, Dict
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from abc import ABC, abstractmethod
 
 
 class EnvConfig(BaseSettings):
@@ -14,10 +15,10 @@ class EnvConfig(BaseSettings):
     )
 
 
-class BaseConfig(BaseSettings):
+class BaseConfig(BaseSettings, ABC):
     """Базовый класс конфигурации с общими настройками"""
 
-    """Конфигурация базы данных"""
+    """Конфигурация базы данных PostgreSQL"""
     ASYNC_DB_DRIVER: str = "postgresql+asyncpg"
     SYNC_DB_DRIVER: str = "postgresql"
     DB_PORT: str = "5432"
@@ -26,6 +27,14 @@ class BaseConfig(BaseSettings):
     DB_USER: str
     DB_PASS: str
     DB_NAME: str
+
+    """Конфигурация сервиса MongoDB"""
+    MONGO_DRIVER: str = "mongodb"
+    MONGO_HOST: str
+    MONGO_PORT: str = "27017"
+    MONGO_DATABASE: str = "notes_app_db"
+    MONGO_USER: str = "admin"
+    MONGO_PASS: str = "admin"
 
     """Конфигурация сервиса Kafka"""
     KAFKA_BOOTSTRAP_SERVERS: List[str]
@@ -63,6 +72,11 @@ class BaseConfig(BaseSettings):
         return f"{self.SYNC_DB_DRIVER}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     @property
+    @abstractmethod
+    def MONGO_URL(self) -> str:
+        pass
+
+    @property
     def KAFKA_PRODUCER_CONFIG(self) -> dict:
         return {
             "bootstrap_servers": self.KAFKA_BOOTSTRAP_SERVERS,
@@ -95,14 +109,24 @@ class BaseConfig(BaseSettings):
 
 class DevelopmentConfig(BaseConfig):
     DB_HOST: str = "localhost"
+    MONGO_HOST: str = "localhost"
     KAFKA_BOOTSTRAP_SERVERS: List[str] = ["localhost:9092"]
     REDIS_HOST: str = "localhost"
+
+    @property
+    def MONGO_URL(self) -> str:
+        return f"{self.MONGO_DRIVER}://{self.MONGO_HOST}:{self.MONGO_PORT}"
 
 
 class DockerConfig(BaseConfig):
     DB_HOST: str = "postgres"
+    MONGO_HOST: str = "mongodb"
     KAFKA_BOOTSTRAP_SERVERS: List[str] = ["kafka:9092"]
     REDIS_HOST: str = "redis"
+
+    @property
+    def MONGO_URL(self) -> str:
+        return f"{self.MONGO_DRIVER}://{self.MONGO_USER}:{self.MONGO_PASS}@{self.MONGO_HOST}:{self.MONGO_PORT}"
 
 
 def get_config() -> BaseConfig:

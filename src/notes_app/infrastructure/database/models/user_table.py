@@ -1,4 +1,4 @@
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from notes_app.infrastructure.database.models.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String
@@ -16,7 +16,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(unique=True)
     hashed_password: Mapped[str]
 
-    notes: Mapped[List["Note"]] = relationship(back_populates="user")
+    notes: Mapped["Note"] = relationship(back_populates="user")
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, username='{self.username!r}')"

@@ -36,7 +36,7 @@ async def get_current_user(
     except JWTError:
         raise credentials_exeption
 
-    user = await user_repo.get_user(username=username)
+    user = await user_repo.get_user_by_username(username=username)
     if user is None:
         raise credentials_exeption
     return user
@@ -64,7 +64,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 async def authenticate_user(username: str, password: str, user_repo: UserRepo):
-    user = await user_repo.get_user(username)
+    user = await user_repo.get_user_by_username(username)
     if not user or not verify_password(password, user.hashed_password):
         raise InvalidCredentialsError("Incorrect username or password")
     access_token_expire = timedelta(minutes=AUTH_JWT_ACCESS_TOKEN_EXPIRE_MINUTES)

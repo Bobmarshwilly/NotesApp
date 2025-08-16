@@ -24,3 +24,5 @@ def delete_old_notes_task(self):
             logger.error(f"Task error: {e}", exc_info=True)
             session.rollback()
             raise
+        finally:
+            session.close()

@@ -43,12 +43,13 @@ async def register_user(
             notifier=notifier,
         )
         return new_user
-    except UsernameAlreadyExists:
+    except UsernameAlreadyExists as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered",
+            detail=str(e),
         )
     except Exception as e:
+        logger.error(f"{e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {e}",
@@ -69,10 +70,10 @@ async def login_for_access_token(
             form_data.username, form_data.password, user_repo=user_repo
         )
         return Token(access_token=access_token, token_type="bearer")
-    except InvalidCredentialsError:
+    except InvalidCredentialsError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail=str(e),
         )
     except Exception as e:
         logger.error(f"Authentication error: {e}")

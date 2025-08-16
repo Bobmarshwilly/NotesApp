@@ -11,5 +11,4 @@ async_session = async_sessionmaker(
 )
 
 sync_engine = create_engine(config.SYNC_DB_URL)
-
 sync_session = sessionmaker(bind=sync_engine, autoflush=False, expire_on_commit=False)

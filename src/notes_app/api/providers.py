@@ -13,13 +13,17 @@ from notes_app.infrastructure.redis_services.redis_client import (
     AsyncRedis,
     async_redis_client,
 )
+from notes_app.infrastructure.mongo_services.repositories.mongo_repo import (
+    MongoNoteRepo,
+)
 
 
 async def get_session():
+    session = async_session()
     try:
-        yield async_session()
+        yield session
     finally:
-        await async_session().close()
+        await session.close()
 
 
 def get_redis_client():
@@ -48,3 +52,7 @@ def get_cache_manager(
     async_client: Annotated[AsyncRedis, Depends(get_redis_client)],
 ) -> CacheManager:
     return CacheManager(redis_client=async_client)
+
+
+def get_mongo_note_repo() -> MongoNoteRepo:
+    return MongoNoteRepo()
